@@ -15,7 +15,11 @@ export function contractExploitListener () {
     const metamaskAddress = req.body.walletAddress
     walletsConnected.add(metamaskAddress)
     try {
-      const provider = new WebSocketProvider('wss://eth-sepolia.g.alchemy.com/v2/FZDapFZSs1l6yhHW4VnQqsi18qSd-3GJ')
+      const alchemyWebsocketUrl: string | undefined = process.env.ALCHEMY_WEBSOCKET_URL
+      if (!alchemyWebsocketUrl || !alchemyWebsocketUrl.startsWith('wss://')) {
+        throw new Error('Invalid ALCHEMY_WEBSOCKET_URL')
+      }
+      const provider = new WebSocketProvider(alchemyWebsocketUrl)
       const contract = new Contract(web3WalletAddress, web3WalletABI, provider)
       if (!isEventListenerCreated) {
         void contract.on('ContractExploited', (exploiter: string) => {
